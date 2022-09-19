@@ -43,20 +43,20 @@ app.post("/register/", async (request, response) => {
     }
   }
 });
-const authToken = (request, response, next) => {
-  const authHeader = request.headers["authorization"];
+const authToken = async (request, response, next) => {
+  const authHeader = await request.headers["authorization"];
+  let jwtToken;
   if (authHeader !== undefined) {
-    const jwtToken = authHeader.split(" ")[1];
+    jwtToken = authHeader.split(" ")[1];
   }
-  if (authHeader === undefined) {
+  if (jwtToken === undefined) {
     response.status(401);
     response.send("Invalid Access Token");
   } else {
-    jwt.verify(jwtToken, "MY SECRET TOKEN", async (error, payload) => {
+    await jwt.verify(jwtToken, "MY SECRET TOKEN", async (error, payload) => {
       if (error) {
         response.send("Invalid Access Token");
       } else {
-        payload.username = username;
         next();
       }
     });
@@ -82,3 +82,36 @@ app.post("/login/", async (request, response) => {
     }
   }
 });
+
+app.get("/user/tweets/feed/", async (request, response) => {
+  const getTweetsQuery = `select user.user_id,user.username as username,tweet.tweet as tweet,tweet.date_time as date_time from tweet inner join user on user.user_id = tweet.user_id order by date_time desc,user.user_id desc,user.username desc limit 4`;
+  const tweetsArray = await db.all(getTweetsQuery);
+  const tweetsObject = tweetsArray.map((obj) => {
+    return {
+      user: obj.user_id,
+      username: obj.username,
+      tweet: obj.tweet,
+      dateTime: obj.date_time,
+    };
+  });
+  response.send(tweetsObject);
+});
+
+app.get("/user/following/", async (request, response) => {
+  const getFollowersQuery = `select name from follower left join user on follower.following_user_id = user.user_id order by follower.following_user_id asc`;
+  const followerArray = await db.all(getFollowersQuery);
+  response.send(followerArray);
+});
+
+app.get("/user/follower/", async (request, response) => {
+  const getFollowersQuery = `select name from follower left join user on follower.follower_user_id = user.user_id order by follower.follower_user_id asc`;
+  const followerArray = await db.all(getFollowersQuery);
+  response.send(followerArray);
+});
+
+app.get("/tweets/:tweetId/", async (request, response) => {
+  const { tweetId } = request.params;
+  const getTweetQuery = `select * from tweet where tweet_id = '${tweetId}'`;
+});
+
+module.exports = app;

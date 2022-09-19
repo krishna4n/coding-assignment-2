@@ -15,3 +15,15 @@ Content-Type: application/json
   "username":"JoeBiden",
   "password":"biden@123"
 }
+###
+
+GET http://localhost:3000/user/tweets/feed/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IkpvZUJpZGVuIiwiaWF0IjoxNjYzNTk3Mzg5fQ.VNrfI8IwX9YrZk2oDFXMmBVA5LTCbmu5m1ykQkPk7Tc
+
+###
+GET http://localhost:3000/user/following/
+
+###
+GET http://localhost:3000/user/follower/
+###
+GET http://localhost:3000/tweets/1/
